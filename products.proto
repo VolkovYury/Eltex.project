@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+message Product {
+	uint32 id = 1;
+	string name = 2;
+	string description = 3;
+	float price = 4;
+	uint32 quantity = 5;
+}
+
+message ProductList {
+	repeated Product data = 1;
+}
