@@ -8,6 +8,7 @@
 #include <arpa/inet.h>//for pton
 #include <errno.h>
 #include "products.pb-c.h"
+#include "client_functions.h"
 #include "network.h"
 
 void printProduct(Product* elem) {
@@ -25,8 +26,7 @@ int main() {
 	struct sockaddr_in server;
 	int talkingSocket;
 
-	ProductList *list;
-	Product *elem;
+	ProductList *list = NULL;
 
 	server.sin_family = AF_INET;
 	if(0 >= inet_pton(AF_INET, "127.0.0.1", &(server.sin_addr))) {
@@ -39,25 +39,22 @@ int main() {
 
 	connect(talkingSocket, (const struct sockaddr * )&server, sizeof(server));
 
-	printf("Received card:\n");
-	receiveProduct(talkingSocket, &elem);
-
-	if(NULL == elem) {
-		printf("Can't unpack\n");
-	}
-	else {
-		printProduct(elem);
-	}
+	sleep(4);
 
 	printf("Received table:\n");
-	receiveProductList(talkingSocket, &list);
+	requestDatabase(talkingSocket, &list);
 
-	if(NULL == list) {
-		printf("Can't unpack\n");
-	}
-	else {
-		printProductList(list);
-	}
+	printProductList(list);
+
+	Product *card = malloc(sizeof(Product));
+	product__init(card);
+	card->id = list->data[0]->id;
+	card->quantity = list->data[0]->quantity;
+	orderCard(talkingSocket, card, &list);
+	free(card);
+
+	printProductList(list);
+
 	product_list__free_unpacked(list, NULL);
 	shutdown(talkingSocket, SHUT_RDWR);
 	close(talkingSocket);

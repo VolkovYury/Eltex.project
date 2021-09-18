@@ -7,13 +7,29 @@
 #include <netinet/ip.h> 
 #include <arpa/inet.h>//for pton
 #include <errno.h>
+#include <pthread.h>
 #include "products.pb-c.h"
 #include "network.h"
+#include "server_functions.h"
+
+
+void printProduct(Product* elem) {
+	printf("id: %u, name: %s, description: %s, price: %f, quantity %u\n",
+	elem->id, elem->name, elem->description, elem->price, elem->quantity);
+}
+
+void printProductList(ProductList *list) {
+	for(size_t i = 0; i < list->n_data; ++i) {
+		printProduct(list->data[i]);
+	}
+}
+
 
 int main(){
 	struct sockaddr_in server;
 	int connectionSocket;
 	int talkingSocket;
+	interprocessdata sharedData = {0, PTHREAD_MUTEX_INITIALIZER, NULL};
 
 	server.sin_family = AF_INET;
 	if(0 >= inet_pton(AF_INET, "127.0.0.1", &(server.sin_addr))) {
@@ -48,19 +64,20 @@ int main(){
 	list.data[1] = &two;
 	list.data[2] = &three;
 
+	sharedData.database = &list;
+
 
 	connectionSocket = socket(AF_INET, SOCK_STREAM, 0);
 	bind(connectionSocket, (const struct sockaddr * )&server, sizeof(server));
 	listen(connectionSocket, 1);
 	talkingSocket = accept(connectionSocket, 0, 0);
 
-	printf("Send one card\n");
-	sendProduct(talkingSocket, &one);
-	printf("Send all table\n");
-	sendProductList(talkingSocket, &list);
-	free(list.data);
+	handleClient(talkingSocket, &sharedData);
+	printf("Server finaly can stop\n");
+	printProductList(sharedData.database);
 
-	
+	free(sharedData.database->data);
+	pthread_mutex_destroy(&sharedData.data_mutex);
 	shutdown(talkingSocket, SHUT_RDWR);
 	close(talkingSocket);
 	shutdown(connectionSocket, SHUT_RDWR);
