@@ -88,22 +88,29 @@ int change_json_file(int CHOICE) // Функция позволяет добав
    FILE *fp;
 
    char file_name[] = JSON_FILE_NAME;
-   int exit = 0;
    int choice = CHOICE;
-
+   int exit = 0;
+   int index = 1;
+   int leght_arr = 0;
+   int i = 0;
+   json_object *arr;
    switch(choice)
    {
       case CREATE:
          if(NULL == (fp = fopen(file_name, "w")))
          {
-            printf("Не удалось открыть файл");
+            printf("Could not open file");
             getchar();
             return 0;
          }
          fputs("[]",fp);
          fclose(fp);
+         arr = json_object_from_file(JSON_FILE_NAME); 
          break;
       case ADD_DATA:
+         arr = json_object_from_file(JSON_FILE_NAME); 
+         leght_arr = json_object_array_length(arr);
+         i = leght_arr;
          break;
       default:
          printf("\nERROR\n");
@@ -111,7 +118,6 @@ int change_json_file(int CHOICE) // Функция позволяет добав
          break;
    }
 
-   json_object *arr = json_object_from_file(JSON_FILE_NAME); 
 
    printf("\nChoise\n");
 
@@ -122,12 +128,14 @@ int change_json_file(int CHOICE) // Функция позволяет добав
       
       if(ADD == exit)
       {
+         i++;
          json_object *node = json_object_new_object();
          struct PRODUCT product = {0, 0, 0, "a", "a"};
          
-         printf("id, quantity, price, name, description: ");
-         scanf("%d %d %lf %s %s", 
-               &product.id,
+         printf("quantity, price, name, description: ");
+         
+         product.id = i;
+         scanf(" %d %lf %s %s", 
                &product.quantity, 
                &product.price, 
                product.name, 
@@ -256,7 +264,6 @@ static int doit(//Функция сравнивает строку из файл
       printf("Found: %s %s %s\n", JSON_OBJECT_STR(parent, "name"),
              JSON_OBJECT_STR(parent, "description"), json_object_to_json_string(obj));
       
-      return JSON_C_VISIT_RETURN_STOP;
    }
    
    return JSON_C_VISIT_RETURN_CONTINUE;
