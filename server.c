@@ -8,9 +8,11 @@
 #include <arpa/inet.h>//for pton
 #include <errno.h>
 #include <pthread.h>
+
 #include "products.pb-c.h"
 #include "network.h"
 #include "server_functions.h"
+#include "wrapperfunc.h"
 
 
 void printProduct(Product* elem) {
@@ -32,9 +34,7 @@ int main(){
 	interprocessdata sharedData = {0, PTHREAD_MUTEX_INITIALIZER, NULL};
 
 	server.sin_family = AF_INET;
-	if(0 >= inet_pton(AF_INET, "127.0.0.1", &(server.sin_addr))) {
-		printf("Wrong ip adress\n");
-	}
+	Inet_pton(AF_INET, "127.0.0.1", &(server.sin_addr));
 	server.sin_port = htons(3001);
 	memset(server.sin_zero, 0, sizeof(server.sin_zero));
 
@@ -67,10 +67,10 @@ int main(){
 	sharedData.database = &list;
 
 
-	connectionSocket = socket(AF_INET, SOCK_STREAM, 0);
-	bind(connectionSocket, (const struct sockaddr * )&server, sizeof(server));
-	listen(connectionSocket, 1);
-	talkingSocket = accept(connectionSocket, 0, 0);
+	connectionSocket = Socket(AF_INET, SOCK_STREAM, 0);
+	Bind(connectionSocket, (const struct sockaddr * )&server, sizeof(server));
+	Listen(connectionSocket, 1);
+	talkingSocket = Accept(connectionSocket, 0, 0);
 
 	handleClient(talkingSocket, &sharedData);
 	printf("Server finaly can stop\n");
@@ -78,9 +78,9 @@ int main(){
 
 	free(sharedData.database->data);
 	pthread_mutex_destroy(&sharedData.data_mutex);
-	shutdown(talkingSocket, SHUT_RDWR);
-	close(talkingSocket);
-	shutdown(connectionSocket, SHUT_RDWR);
-	close(connectionSocket);
+	Shutdown(talkingSocket, SHUT_RDWR);
+	Close(talkingSocket);
+	Shutdown(connectionSocket, SHUT_RDWR);
+	Close(connectionSocket);
 	return 0;
 }

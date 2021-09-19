@@ -1,62 +1,88 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <string.h>//for memset
-#include <stdlib.h>//for malloc
+#include <string.h>                     //for memset
+#include <stdlib.h>                     //for malloc
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/ip.h> 
-#include <arpa/inet.h>//for pton
+#include <netinet/ip.h>
+#include <arpa/inet.h>                  //for pton
 #include <errno.h>
+
 #include "products.pb-c.h"
 #include "client_functions.h"
 #include "network.h"
+#include "wrapperfunc.h"
 
-void printProduct(Product* elem) {
-	printf("id: %u, name: %s, description: %s, price: %f, quantity %u\n",
-	elem->id, elem->name, elem->description, elem->price, elem->quantity);
-}
+static struct sockaddr_in server;
 
-void printProductList(ProductList *list) {
-	for(size_t i = 0; i < list->n_data; ++i) {
-		printProduct(list->data[i]);
-	}
-}
+int main()
+{
+        int menu = 0;
+        int code = 0;
+        int pcs = 0;
 
-int main() {
-	struct sockaddr_in server;
-	int talkingSocket;
+        ProductList *list = NULL;
+        Product *elem;
 
-	ProductList *list = NULL;
+        int talkingSocket = connection(server);
 
-	server.sin_family = AF_INET;
-	if(0 >= inet_pton(AF_INET, "127.0.0.1", &(server.sin_addr))) {
-		printf("Wrong ip adress\n");
-	}
-	server.sin_port = htons(3001);
-	memset(server.sin_zero, 0, sizeof(server.sin_zero));
+        sleep(2);
 
-	talkingSocket = socket(AF_INET, SOCK_STREAM, 0);
+        printMenu();
 
-	connect(talkingSocket, (const struct sockaddr * )&server, sizeof(server));
+        while (1) {
+                printf("Enter \"0\" to display the menu again\n");
+                printf("Enter the section number (UNSAFE): ");
+                scanf("%d", &menu);
 
-	sleep(4);
+                switch (menu) {
+                case 1:
+                        requestDatabase(talkingSocket, &list);
+                        printDatabase(list);
+                        break;
+                case 2:
+                        printf("[Product selection for information]\n");
+                        printf("Enter the product code (UNSAFE): ");
+                        scanf("%d", &code);
 
-	printf("Received table:\n");
-	requestDatabase(talkingSocket, &list);
+                        requestDatabase(talkingSocket, &list);
 
-	printProductList(list);
 
-	Product *card = malloc(sizeof(Product));
-	product__init(card);
-	card->id = list->data[0]->id;
-	card->quantity = list->data[0]->quantity;
-	orderCard(talkingSocket, card, &list);
-	free(card);
+                        //receiveProduct(talkingSocket, &elem);
+                        //printOneInfo(elem);
+                        break;
+                case 3:
+                        printf("[Product and quantity selection for order request]\n");
+                        printf("Enter the product code (UNSAFE): ");
+                        scanf("%d", &code);
+                        printf("Enter the quantity (UNSAFE): ");
+                        scanf("%d", &pcs);
 
-	printProductList(list);
+                        // Тут нужна функция, которая отправит серверу структуру [код товара + количество]. А сервер обработает и пришлёт ответ.
 
-	product_list__free_unpacked(list, NULL);
-	shutdown(talkingSocket, SHUT_RDWR);
-	close(talkingSocket);
-	return 0;
+                        // Код из клиента Максима на полный выкуп(?) первой карточки(?)
+                        Product *card = malloc(sizeof(Product));
+                        product__init(card);
+                        card->id = list->data[0]->id;
+                        card->quantity = list->data[0]->quantity;
+                        orderCard(talkingSocket, card, &list);
+                        free(card);
+
+                        break;
+                case 4:
+                        printf("Closing a connection...\n");
+                        sleep(2);
+                        product_list__free_unpacked(list, NULL);
+                        Shutdown(talkingSocket, SHUT_RDWR);
+                        Close(talkingSocket);
+                        return EXIT_SUCCESS;
+                case 0:
+                        printMenu();
+                        break;
+                default:
+                        printf("Invalid value entered!\n");
+                }
+        }
+
+        return 0;
 }
