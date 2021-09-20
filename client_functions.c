@@ -3,10 +3,12 @@
 #include <sys/types.h>
 #include <netinet/ip.h>
 #include <string.h>
-
 #include "network.h"
 #include "products.pb-c.h"
 #include "wrapperfunc.h"
+#include "client_functions.h"
+#include "network.h"
+#include "products.pb-c.h"
 
 // Search for card in database, if nothing found return database size
 size_t findCard(const Product *card, const ProductList *database)
@@ -76,7 +78,6 @@ void orderCard(int fd, const Product *card, ProductList **list)
 		}
 	}
 }
-
 
 //
 int connection(struct sockaddr_in servaddr) {

@@ -12,5 +12,4 @@ void printMenu();
 void printInfo(Product *elem);
 void printDatabase(ProductList *list);
 void printOneInfo(Product *elem);
-
 #endif
