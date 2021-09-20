@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <string.h>
+#include "jsonEditor.h"
 #include "json-cH/json.h"
 #include "json-cH/json_visit.h"
 
 #define JSON_FILE_NAME "product.json"
 #define JSON_OBJECT_STR(obj, key) json_object_get_string(json_object_object_get(obj, key))
 
-char filter[64] = "id";
+char filter[64] = "";
 
 enum action 
 {
@@ -18,70 +19,6 @@ enum action
    EXIT = 6,
    ADD = 7
 };
-
-typedef struct PRODUCT
-{
-   int id; 
-   int quantity;
-   double price;
-   char name[50];
-   char description[100];
-} PRODUCT;
-
-int add_info(json_object * const, struct PRODUCT * const);
-int print_json_object_arr(json_object *obj);
-int print_json_object(json_object *obj);
-int scan_json_object(json_object *obj);
-static int doit(json_object *obj, int flags, json_object *parent, const char *key, size_t *index, void *data);
-int write_json_object_in_struct();
-int view_json_file();
-int change_json_file(int);
-int find_info_json_file();
-
-int main(void) // Меню
-{
-   int exit = 0;
-   
-   while(EXIT != exit)
-   {
-      printf(" 1.View the json file\
-             \n 2.Create the json file and add date \
-             \n 3.Search in the json file\
-             \n 4.Load the json file in struct\
-             \n 5.Add date in the json file\
-             \n 6.Exit\
-             \nEnter: ");
-      
-      scanf("%d", &exit);
-      
-      switch(exit)
-      {
-         case VIEW:
-            view_json_file();
-            break;
-         case CREATE:
-            change_json_file(CREATE);
-            break;
-         case SEARCH:
-            find_info_json_file();
-            break;
-         case LOAD:
-            write_json_object_in_struct();
-            break;
-         case ADD_DATA:
-            change_json_file(ADD_DATA);
-            break;             
-         case EXIT:
-            break;                       
-         default:
-            printf("\nERROR\n");
-            break;
-      }
-      printf("\n");
-   }
-
-   return 0;
-}
 
 int change_json_file(int CHOICE) // Функция позволяет добавлять информацию в непустой файл json и очищать данный файл.
 {

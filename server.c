@@ -13,6 +13,8 @@
 #include "products.pb-c.h"
 #include "network.h"
 #include "server_functions.h"
+#include "jsonEditor.h"
+
 #define MAX_CLIENTS_IN_QUEUE (size_t)10
 
 int main()
@@ -59,7 +61,7 @@ int main()
 		return -1;
 	}
 
-	connectionSocket = makeListenSocket("127.0.0.1", 3001);
+	connectionSocket = makeListenSocket("127.0.0.1", 3006);
 	if (-1 == connectionSocket) {
 		return -1;
 	}
