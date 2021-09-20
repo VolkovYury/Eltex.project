@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
-#include <json-c/json.h>
-#include "json_visit.h"
+#include "json-cH/json.h"
+#include "json-cH/json_visit.h"
 
 #define JSON_FILE_NAME "product.json"
 #define JSON_OBJECT_STR(obj, key) json_object_get_string(json_object_object_get(obj, key))
