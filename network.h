@@ -8,6 +8,7 @@
 #define ORDER_REQUEST (uint8_t)11
 #define FAILURE (uint8_t)20
 #define ACCEPT (uint8_t)21
+#define SERVER_DISCOVER_TIME (int)1000
 #define CLIENT_POOL_TIME (int)2000
 
 int sendProduct(int fd, const Product *element);
