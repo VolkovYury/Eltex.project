@@ -17,55 +17,43 @@
 
 #define MAX_CLIENTS_IN_QUEUE (size_t)10
 
-int main()
+int main(int argc, char *argv[])
 {
-	int connectionSocket;
-	int talkingSocket;
-	pthread_t commandThread;
-	pthread_t *pthreadList;
+	int connectionSocket = -1;
+	int talkingSocket = 0;
+	pthread_t commandThread = 0;
+	pthread_t *pthreadList = NULL;
 	size_t pthreadsMax;
 	size_t pthreadsSize;
 	interprocessdata sharedData = {0, PTHREAD_MUTEX_INITIALIZER, NULL};
 	struct pollfd poolData;
+	const char *address;
+	uint16_t port;
 
-	//Fill database
-	Product one = PRODUCT__INIT;
-	one.id = 1;
-	one.name = "Something";
-	one.description = "This is Something";
-	one.price = 1.0f;
-	one.quantity = 5;
-	Product two = PRODUCT__INIT;
-	two.id = 2;
-	two.name = "foo";
-	two.description = "Lorem ipsum";
-	two.price = 1.5f;
-	two.quantity = 52;
-	Product three = PRODUCT__INIT;
-	three.id = 3;
-	three.name = "The thing";
-	three.description = "Super cool thing";
-	three.price = 25.f;
-	three.quantity = 1;
-	ProductList list = PRODUCT_LIST__INIT;
-	list.n_data = 3;
-	list.data = malloc(sizeof(Product *) * 3);
-	list.data[0] = &one;
-	list.data[1] = &two;
-	list.data[2] = &three;
-
-	sharedData.database = &list;
-
-	if (0 != pthread_create(&commandThread, NULL, listenInput, (void *)(&sharedData))) {
-		printf("Can't create command thread\n");
-		return -1;
+	if (argc < 3) {
+		printf("Not enough arguments.\nLaunch with command: ./server \"IP ADDRESS\" \"PORT\"\n");
+		return 0;
 	}
+	address = argv[1];
+	port = (uint16_t)atoi(argv[2]);
 
-	connectionSocket = makeListenSocket("127.0.0.1", 3006);
-	if (-1 == connectionSocket) {
-		return -1;
+	if (-1 == load_to_ProductList(&sharedData, "product.json")) {
+		printf("Can't load product list\n");
+		goto FREE_AND_EXIT;
 	}
 	
+	if (0 != pthread_create(&commandThread, NULL, listenInput, (void *)(&sharedData))) {
+		printf("Can't create command thread\n");
+		goto FREE_AND_EXIT;
+	}
+
+	connectionSocket = makeListenSocket(address, port);
+	if (-1 == connectionSocket) {
+		goto FREE_AND_EXIT;
+	}
+	
+	printf("Server start working\n");
+
 	poolData.fd = connectionSocket;
 	poolData.events = POLLIN;
 	while(!(sharedData.exit_signal)) {
@@ -87,22 +75,28 @@ int main()
 		talkingSocket = accept(connectionSocket, 0, 0);
 		if (-1 == talkingSocket) {
 			printf("Can't accept connection\n");
-			return -1;
+			goto FREE_AND_EXIT;
 		}
+		printf("Connection %d opened\n", talkingSocket);
 		if (0 != pthread_create(&locId, NULL, handleClient, (void *)(&tmp))) {
 			printf("Can't create thread\n");
-			return -1;
+			goto FREE_AND_EXIT;
 		}
 		addPthreadToList(locId, &pthreadList, &pthreadsMax, &pthreadsSize);
 	}
 
-	printf("Server finaly can stop\n");
-	printProductList(sharedData.database);
+	save_to_file(&sharedData, "product.json");
 
-	waitForThreads(pthreadList, pthreadsSize);
-	free(sharedData.database->data);
+FREE_AND_EXIT:
+	if (NULL != pthreadList) {
+		waitForThreads(pthreadList, pthreadsSize);
+	}
+	freeProductList(sharedData.database);
 	pthread_mutex_destroy(&sharedData.data_mutex);
-	shutdown(connectionSocket, SHUT_RDWR);
-	close(connectionSocket);
+	if (-1 != connectionSocket) {
+		shutdown(connectionSocket, SHUT_RDWR);
+		close(connectionSocket);
+	}
+	printf("Server stop working\n");
 	return 0;
 }

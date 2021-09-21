@@ -14,23 +14,65 @@
 
 int makeNewProductList(ProductList **list, size_t n_data)
 {
+	*list = malloc(sizeof(ProductList));
+	if (NULL == list) {
+		return -1;
+	}
 	product_list__init(*list);
 	(*list)->n_data = n_data;
 	(*list)->data = malloc(sizeof(Product *) * n_data);
 	if (NULL == (*list)->data) {
 		return -1;
 	}
+	for (size_t i = 0; i < n_data; ++i) {
+		(*list)->data[i] = NULL;
+	}
 	return 0;
 }
 
-void makeNewProduct(Product *elem, int id, char *name, char *description, float price, uint32_t quantity)
+int makeNewProduct(Product **elem, uint32_t id, const char *name, const char *description, float price, uint32_t quantity)
 {
-	product__init(elem);
-	elem->id = id;
-	elem->name = name;
-	elem->description = description;
-	elem->price = price;
-	elem->quantity = quantity;
+	*elem = malloc(sizeof(Product));
+	if (NULL == *elem) {
+		return -1;
+	}
+	product__init(*elem);
+	(*elem)->id = id;
+	(*elem)->name = malloc(strlen(name));
+	if (NULL == (*elem)->name) {
+		return -1;
+	}
+	strcpy((*elem)->name, name);
+	(*elem)->description = malloc(strlen(description));
+	if (NULL == (*elem)->description) {
+		return -1;
+	}
+	strcpy((*elem)->description, description);
+	(*elem)->price = price;
+	(*elem)->quantity = quantity;
+	return 0;
+}
+
+void freeProduct(Product *elem)
+{
+	if(NULL == elem) {
+		return;
+	}
+	free(elem->name);
+	free(elem->description);
+	free(elem);
+}
+
+void freeProductList(ProductList *list)
+{
+	if(NULL == list) {
+		return;
+	}
+	for (size_t i = 0; i < list->n_data; ++i) {
+		freeProduct(list->data[i]);
+	}
+	free(list->data);
+	free(list);
 }
 
 //Print one product to terminal
@@ -64,6 +106,10 @@ int makeListenSocket(const char *address, uint16_t port)
 	server.sin_family = AF_INET;
 	if (0 >= inet_pton(AF_INET, address, &(server.sin_addr))) {
 		printf("Wrong ip address\n");
+		return -1;
+	}
+	if (0 == port) {
+		printf("Wrong port\n");
 		return -1;
 	}
 	server.sin_port = htons(port);
@@ -209,7 +255,8 @@ void *handleClient(void *args)
 		else if ( ret == 0 ) {
 			continue;
 		}
-		//if can receive something happened
+
+		//if can receive and something happened
 		poolData.revents = 0;
 		if (0 == recv(fd, &signal, 1, 0)) {
 			printf("Connection %d closed\n", fd);
