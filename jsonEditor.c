@@ -198,9 +198,13 @@ static int doit(//Функция сравнивает строку из файл
 
    if (strcmp(json_object_get_string(obj), filter) == 0)
    {
-      printf("Found: %s %s %s\n", JSON_OBJECT_STR(parent, "name"),
-             JSON_OBJECT_STR(parent, "description"), json_object_to_json_string(obj));
-      
+      printf("Found:\n");
+      printf(" ID: %s\n", JSON_OBJECT_STR(parent,"id")); 
+      printf(" Quantity: %s\n", JSON_OBJECT_STR(parent,"quantity"));
+      printf(" Price: %s\n", JSON_OBJECT_STR(parent, "price"));
+      printf(" Name: %s\n", JSON_OBJECT_STR(parent, "name"));
+      printf(" Description: %s\n", JSON_OBJECT_STR(parent, "description"));
+      printf("----------------------------------\n");
    }
    
    return JSON_C_VISIT_RETURN_CONTINUE;
