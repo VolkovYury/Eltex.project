@@ -66,12 +66,12 @@ int main(int argc, char *argv[])
 			markExit(&sharedData);
 			break;
 		}
-		//if nothing happend
+		//if nothing happened
 		else if ( ret == 0 ) {
 			continue;
 		}
 
-		//if receive somthing
+		//if receive something
 		talkingSocket = accept(connectionSocket, 0, 0);
 		if (-1 == talkingSocket) {
 			printf("Can't accept connection\n");

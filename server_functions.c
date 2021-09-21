@@ -105,7 +105,7 @@ int makeListenSocket(const char *address, uint16_t port)
 	int connectionSocket;
 	server.sin_family = AF_INET;
 	if (0 >= inet_pton(AF_INET, address, &(server.sin_addr))) {
-		printf("Wrong ip adress\n");
+		printf("Wrong ip address\n");
 		return -1;
 	}
 	if (0 == port) {
@@ -131,7 +131,7 @@ int makeListenSocket(const char *address, uint16_t port)
 	return connectionSocket;
 }
 
-//Function what read comands from terminal
+//Function what read commands from terminal
 void *listenInput(void *data)
 {
 	interprocessdata *sharedData = (interprocessdata *)(data);
@@ -178,7 +178,7 @@ int addPthreadToList(pthread_t thread, pthread_t **list, size_t *maxSize, size_t
 	return 0;
 }
 
-//Whait for all threads
+//Wait for all threads
 void waitForThreads(pthread_t *list, size_t size)
 {
 	for(size_t i = 0; i < size; ++i) {
@@ -237,7 +237,7 @@ void *handleClient(void *args)
 {
 	int fd = ((threadData *)args)->fd;
 	interprocessdata *sharedData = ((threadData *)args)->shared;
-	uint8_t signal;
+        uint8_t signal;
 	uint8_t respond;
 	struct pollfd poolData;
 	poolData.fd = fd;
@@ -251,11 +251,12 @@ void *handleClient(void *args)
 			printf("Connection %d closed\n", fd);
 			break;
 		}
-		//if nothing happend
+		//if nothing happened
 		else if ( ret == 0 ) {
 			continue;
 		}
-		//if can receive and somthing happend
+
+		//if can receive and something happened
 		poolData.revents = 0;
 		if (0 == recv(fd, &signal, 1, 0)) {
 			printf("Connection %d closed\n", fd);
@@ -272,9 +273,10 @@ void *handleClient(void *args)
 				break;
 			}
 			break;
+
 		default:
-			printf("recived strange signal%u\n", signal);
-			break;
+                        printf("Received strange signal%u\n", signal);
+                        break;
 		}
 	}
 	shutdown(fd, SHUT_RDWR);

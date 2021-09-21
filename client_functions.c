@@ -39,7 +39,7 @@ int requestDatabase(int fd, ProductList **list)
 	return 0;
 }
 
-//Order one card and handle answer
+// Order one card and handle answer
 void orderCard(int fd, const Product *card, ProductList **list)
 {
 	uint8_t signal = ORDER_REQUEST;
@@ -235,6 +235,8 @@ void printDatabase(ProductList *list) {
                 for(size_t i = 0; i < list->n_data; ++i) {
                         printInfo(list->data[i]);
                 }
+
+                printf("\n\n");
         }
 }
 
@@ -251,6 +253,7 @@ void printOneInfo(Product *elem) {
                 printf("--------------------------------------------------------------------------------\n");
 
                 printInfo(elem);
+                printf("\n\n");
         }
 }
 
