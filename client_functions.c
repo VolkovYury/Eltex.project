@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <netinet/ip.h>
 #include <string.h>
+
 #include "network.h"
 #include "products.pb-c.h"
 #include "wrapperfunc.h"
@@ -79,18 +81,17 @@ void orderCard(int fd, const Product *card, ProductList **list)
 	}
 }
 
-//
+// The function is responsible for connecting the client to the server at a known ip-address and port
 int connection(struct sockaddr_in servaddr) {
         char addressServ[16];
-        int port;
 
         int fd = Socket(AF_INET, SOCK_STREAM, 0);
 
         printf("================================================================================\n");
         printf("Enter the IP address of the server (UNSAFE): ");
         scanf("%s", addressServ);
-        printf("Enter the server port number (UNSAFE): ");
-        scanf("%d", &port);
+        printf("Enter the server port number: ");
+        int port = enterNumber(1, 65535);
         printf("================================================================================\n");
 
         servaddr.sin_family = AF_INET;
@@ -103,22 +104,21 @@ int connection(struct sockaddr_in servaddr) {
         return fd;
 }
 
-//
+// The function prints menu to the console
 void printMenu() {
         printf("=====================================[MENU]=====================================\n");
         printf("1. Get all relevant information\n");
-        printf("2. Get up-to-date information on the product\n");
+        printf("2. Get relevant information on the product\n");
         printf("3. Make a purchase request\n");
         printf("4. Exit\n");
         printf("--------------------------------------------------------------------------------\n");
         printf("Use keyboard input to interact. To open a section of interest, enter its number and press \"Enter\".\n");
-        printf("Enter \"0\" to display the menu again\n");
         printf("================================================================================\n");
 }
 
-// Функция построения строки таблицы
+// The function prints the contents of one card in the format of a table row to the console
 void printInfo(Product *elem) {
-        // Количество строк в каждом поле (исходя из ширины поля и размера массива символов)
+        // Number of lines in each field (based on field width and character array size)
         int numOfLines = 1;
         int stringId = 1;
         int stringName = 1;
@@ -129,22 +129,21 @@ void printInfo(Product *elem) {
         char separator = '|';
         /*
          * magic number:
-         * 9 - 4 char * 2 string + (\n)
+         * 11 - uint32_t max 10-digit number + (\n)
          * 41 - 10 char * 4 string + (\n)
          * 181 - 45 char * 4 string + (\n)
          * 23 - 11 char * 2 string + (\n)
-         * 9 - 4 char * 2 string + (\n)
          */
-        char id[9];
-        snprintf(id, 9, "%u", elem->id);
+        char id[11];
+        snprintf(id, 11, "%u", elem->id);
         char name[41];
         snprintf(name, 41, "%s", elem->name);
         char description[181];
         snprintf(description, 181, "%s", elem->description);
         char price[23];
         snprintf(price, 23, "%.2f", elem->price);
-        char pieces[9];
-        snprintf(pieces, 9, "%u", elem->quantity);
+        char pieces[11];
+        snprintf(pieces, 11, "%u", elem->quantity);
 
         for (int ptr = 1; ptr <= strlen(id); ptr = ptr + 4) {
                 if ((float) ptr / 4 > (float) numOfLines) {
@@ -181,7 +180,7 @@ void printInfo(Product *elem) {
                 }
         }
 
-        // Построение структуры таблицы
+        // Creating the structure of a table row
         for (int i = 1; i <= numOfLines; i++) {
 
                 if (i <= stringId) {
@@ -221,12 +220,13 @@ void printInfo(Product *elem) {
         printf("--------------------------------------------------------------------------------\n");
 }
 
-// Функция вывода в консоль содержимого всей таблицы
+// The function prints the contents of the database to the console
 void printDatabase(ProductList *list) {
         if(NULL == list) {
                 printf("Can't unpack\n");
         }
         else {
+                printf("\n\n");
                 printf("                           [All relevant information]                           \n");
                 printf("--------------------------------------------------------------------------------\n");
                 printf("|CODE|   NAME   |                 DESCRIPTION                 |   PRICE   |PCS |\n");
@@ -238,17 +238,35 @@ void printDatabase(ProductList *list) {
         }
 }
 
-// Функция вывода в консоль содержимого одного товара
+// The function prints the contents of one card to the console
 void printOneInfo(Product *elem) {
         if(NULL == elem) {
                 printf("Can't unpack\n");
         }
         else {
+                printf("\n\n");
                 printf("                        [Information about one product!]                        \n");
                 printf("--------------------------------------------------------------------------------\n");
                 printf("|CODE|   NAME   |                 DESCRIPTION                 |   PRICE   |PCS |\n");
                 printf("--------------------------------------------------------------------------------\n");
 
                 printInfo(elem);
+        }
+}
+
+// The function is responsible for user input of numbers
+// min, max - the minimum and maximum value, respectively. These values are included in the range of values
+// return - correct number. If the user does not enter a number, then strtol() will return 0.
+int enterNumber(uint32_t min, uint32_t max) {
+        char enteredString[80];
+
+        while (1) {
+                scanf("%s", enteredString);
+                int result = (int) strtol(enteredString, NULL, 10);
+
+                if (result < min || result > max)
+                        printf("WARNING: Invalid value. Try again:\n");
+                else
+                        return result;
         }
 }

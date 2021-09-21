@@ -17,66 +17,56 @@ static struct sockaddr_in server;
 
 int main()
 {
-        int menu = 0;
-        int code = 0;
-        int pcs = 0;
-
         ProductList *list = NULL;
-        Product *elem;
 
         int talkingSocket = connection(server);
-
-        sleep(2);
-
+        sleep(1);
         printMenu();
 
         while (1) {
-                printf("Enter \"0\" to display the menu again\n");
-                printf("Enter the section number (UNSAFE): ");
-                scanf("%d", &menu);
+                printf("Enter \"5\" to display the menu again\n");
+                printf("Enter the section number: ");
+                int menu = enterNumber(1, 5);
+                int code = 0;
 
                 switch (menu) {
-                case 1:
+                case PRINT_DATABASE:
                         requestDatabase(talkingSocket, &list);
                         printDatabase(list);
                         break;
                 case 2:
                         printf("[Product selection for information]\n");
                         printf("Enter the product code (UNSAFE): ");
-                        scanf("%d", &code);
+                        code = enterNumber(1, 4294967295);
 
-                        requestDatabase(talkingSocket, &list);
-
+                        //requestDatabase(talkingSocket, &list);
 
                         //receiveProduct(talkingSocket, &elem);
                         //printOneInfo(elem);
                         break;
-                case 3:
+                case ORDER_REQST:
                         printf("[Product and quantity selection for order request]\n");
-                        printf("Enter the product code (UNSAFE): ");
-                        scanf("%d", &code);
-                        printf("Enter the quantity (UNSAFE): ");
-                        scanf("%d", &pcs);
+                        printf("Enter the product code: ");
+                        code = enterNumber(1, 4294967295);            // max value - max uint32_t number
+                        printf("Enter the quantity: ");
+                        int pcs = enterNumber(1, 4294967295);
 
-                        // Тут нужна функция, которая отправит серверу структуру [код товара + количество]. А сервер обработает и пришлёт ответ.
-
-                        // Код из клиента Максима на полный выкуп(?) первой карточки(?)
                         Product *card = malloc(sizeof(Product));
                         product__init(card);
-                        card->id = list->data[0]->id;
-                        card->quantity = list->data[0]->quantity;
+                        card->id = code;
+                        card->quantity = pcs;
                         orderCard(talkingSocket, card, &list);
                         free(card);
 
                         break;
-                case 4:
+                case CLOSE:
                         printf("Closing a connection...\n");
                         sleep(2);
                         product_list__free_unpacked(list, NULL);
                         Shutdown(talkingSocket, SHUT_RDWR);
                         Close(talkingSocket);
                         return EXIT_SUCCESS;
-                case 0:
+                case PRINT_MENU:
                         printMenu();
                         break;
                 default:
