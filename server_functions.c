@@ -108,6 +108,10 @@ int makeListenSocket(const char *address, uint16_t port)
 		printf("Wrong ip adress\n");
 		return -1;
 	}
+	if (0 == port) {
+		printf("Wrong port\n");
+		return -1;
+	}
 	server.sin_port = htons(port);
 	memset(server.sin_zero, 0, sizeof(server.sin_zero));
 

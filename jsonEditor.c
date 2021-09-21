@@ -236,10 +236,10 @@ int write_json_object_in_struct()//Функция записи данных из
    return 0;
 }
 
-int load_to_ProductList(interprocessdata *shared)
+int load_to_ProductList(interprocessdata *shared, const char *filename)
 {
 	json_object *node;
-	json_object *arr = json_object_from_file(JSON_FILE_NAME);
+	json_object *arr = json_object_from_file(filename);
 	size_t length = json_object_array_length(arr);
 	int ret;
 
@@ -271,15 +271,15 @@ int load_to_ProductList(interprocessdata *shared)
 	return 0;
 }
 
-int save_to_file(interprocessdata *shared)
+int save_to_file(interprocessdata *shared, const char *filename)
 {
 	ProductList *list = shared->database;
-	json_object *node;
-	json_object *arr;
+	json_object *arr = json_object_new_array();
 	for (size_t i = 0; i < list->n_data; ++i) {
 		pthread_mutex_lock(&(shared->data_mutex));
+	   json_object *node = json_object_new_object();
 		if (json_object_object_add(node, "id",
-		json_object_new_uint64((uint64_t)(list->data[i]->id))) < 0) {
+      json_object_new_uint64((uint64_t)(list->data[i]->id))) < 0) {
 			printf("Can't add field to node\n");
 			pthread_mutex_unlock(&(shared->data_mutex));
 			return -1;
@@ -316,7 +316,9 @@ int save_to_file(interprocessdata *shared)
 
 		json_object_array_add(arr, node);
 	}
-	json_object_to_file(JSON_FILE_NAME, arr);
+	if (-1 == json_object_to_file(filename, arr)) {
+      printf("Can't save to file\n");
+   }
 	json_object_put(arr);
 	return 0;
 }
