@@ -20,5 +20,5 @@ wrapperfunc.o: wrapperfunc.c
 clean:
 	rm -rf network.o server.o client.o products.pb-c.o server_functions.o client_functions.o wrapperfunc.o jsonEditor.o client server
 debug:
-	gcc -g client.c products.pb-c.c network.c client_functions.c wrapperfunc.c -o client -lpthread -L./protobuf-c -lprotobuf-c -Wl,-rpath,./protobuf-c -Wall -Wextra -Werror
-	gcc -g server.c products.pb-c.c network.c server_functions.c wrapperfunc.c -o server -lpthread -L./protobuf-c -lprotobuf-c -Wl,-rpath,./protobuf-c -Wall -Wextra -Werror
+	#gcc -g client.c products.pb-c.c network.c client_functions.c wrapperfunc.c -o client -lpthread -L./protobuf-c -lprotobuf-c -Wl,-rpath,./protobuf-c -Wall -Wextra -Werror
+	gcc -g server.c products.pb-c.c network.c server_functions.c wrapperfunc.c jsonEditor.c -o server -lpthread -L./protobuf-c -lprotobuf-c -Wl,-rpath,./protobuf-c -L./json-cH -ljson-c -Wl,-rpath,./json-cH -Wall -Wextra -Werror
