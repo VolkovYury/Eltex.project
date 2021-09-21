@@ -34,20 +34,29 @@ int main()
                         requestDatabase(talkingSocket, &list);
                         printDatabase(list);
                         break;
-                case 2:
+                case PRINT_ONE_CARD:
                         printf("[Product selection for information]\n");
-                        printf("Enter the product code (UNSAFE): ");
-                        code = enterNumber(1, 4294967295);
+                        printf("Enter the product code: ");
+                        code = enterNumber(1, 4294967295);      // max value - max uint32_t number
+                        requestDatabase(talkingSocket, &list);
 
-                        //requestDatabase(talkingSocket, &list);
+                        Product *oneCard = malloc(sizeof(Product));
+                        product__init(oneCard);
+                        oneCard->id = code;
 
-                        //receiveProduct(talkingSocket, &elem);
-                        //printOneInfo(elem);
+                        size_t i = findCard(oneCard, list);
+
+                        if (i == list->n_data)
+                                printf("No card found in the database\n");
+                        else
+                                printOneInfo(list->data[i]);
+
+                        free(oneCard);
                         break;
                 case ORDER_REQST:
                         printf("[Product and quantity selection for order request]\n");
                         printf("Enter the product code: ");
-                        code = enterNumber(1, 4294967295);            // max value - max uint32_t number
+                        code = enterNumber(1, 4294967295);
                         printf("Enter the quantity: ");
                         int pcs = enterNumber(1, 4294967295);
 
