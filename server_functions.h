@@ -24,5 +24,9 @@ int makeListenSocket(const char *address, uint16_t port);
 void markExit(interprocessdata *shared);
 void printProductList(ProductList *list);
 void printProduct(Product* elem);
+int makeNewProduct(Product **elem, uint32_t id, const char *name, const char *description, float price, uint32_t quant);
+int makeNewProductList(ProductList **list, size_t n_data);
+void freeProduct(Product *elem);
+void freeProductList(ProductList *list);
 
 #endif

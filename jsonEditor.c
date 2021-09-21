@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <pthread.h>
 #include "jsonEditor.h"
 #include "json-cH/json.h"
 #include "json-cH/json_visit.h"
@@ -229,4 +230,89 @@ int write_json_object_in_struct()//Функция записи данных из
    json_object_put(arr);
 
    return 0;
+}
+
+int load_to_ProductList(interprocessdata *shared)
+{
+	json_object *node;
+	json_object *arr = json_object_from_file(JSON_FILE_NAME);
+	size_t length = json_object_array_length(arr);
+	int ret;
+
+	pthread_mutex_lock(&(shared->data_mutex));
+	if (-1 == makeNewProductList(&(shared->database), length)) {
+		printf("Can't make new product list\n");
+		return -1;
+	}
+
+	for (size_t i = 0; i < length; ++i) {
+		node = json_object_array_get_idx(arr, i);
+
+		//make one product
+		ret = makeNewProduct(&(shared->database->data[i]),
+		(uint32_t)json_object_get_uint64(json_object_object_get(node, "id")),
+		json_object_get_string(json_object_object_get(node, "name")),
+		json_object_get_string(json_object_object_get(node, "description")),
+		json_object_get_double(json_object_object_get(node, "price")),
+		(uint32_t)json_object_get_uint64(json_object_object_get(node, "quantity")));
+		
+		if (-1 == ret) {
+			printf("Can't make new product\n");
+			freeProductList(shared->database);
+			pthread_mutex_unlock(&(shared->data_mutex));
+			return -1;
+		}
+	}
+	pthread_mutex_unlock(&(shared->data_mutex));
+	return 0;
+}
+
+int save_to_file(interprocessdata *shared)
+{
+	ProductList *list = shared->database;
+	json_object *node;
+	json_object *arr;
+	for (size_t i = 0; i < list->n_data; ++i) {
+		pthread_mutex_lock(&(shared->data_mutex));
+		if (json_object_object_add(node, "id",
+		json_object_new_uint64((uint64_t)(list->data[i]->id))) < 0) {
+			printf("Can't add field to node\n");
+			pthread_mutex_unlock(&(shared->data_mutex));
+			return -1;
+		}
+
+		if (json_object_object_add(node, "quantity",
+		json_object_new_uint64((uint64_t)(list->data[i]->quantity))) < 0) {
+			printf("Can't add field to node\n");
+			pthread_mutex_unlock(&(shared->data_mutex));
+			return -1;
+		}
+
+		if (json_object_object_add(node, "price",
+		json_object_new_double((double)(list->data[i]->price))) < 0) {
+			printf("Can't add field to node\n");
+			pthread_mutex_unlock(&(shared->data_mutex));
+			return -1;
+		}
+
+		if (json_object_object_add(node, "name",
+		json_object_new_string(((char*)list->data[i]->name))) < 0) {
+			printf("Can't add field to node\n");
+			pthread_mutex_unlock(&(shared->data_mutex));
+			return -1;
+		}
+
+		if (json_object_object_add(node, "description",
+		json_object_new_string(((char*)list->data[i]->description))) < 0) {
+			printf("Can't add field to node\n");
+			pthread_mutex_unlock(&(shared->data_mutex));
+			return -1;
+		}
+		pthread_mutex_unlock(&(shared->data_mutex));
+
+		json_object_array_add(arr, node);
+	}
+	json_object_to_file(JSON_FILE_NAME, arr);
+	json_object_put(arr);
+	return 0;
 }

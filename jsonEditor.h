@@ -1,9 +1,11 @@
-#ifndef SERVER_FUNCTIONS
-#define SERVER_FUNCTIONS
+#ifndef JSON_EDITOR
+#define JSON_EDITOR
 #include <stdint.h>
 #include "products.pb-c.h"
 #include "json-cH/json.h"
 #include "json-cH/json_visit.h"
+#include "server_functions.h"
+
 
 typedef struct PRODUCT
 {
@@ -18,6 +20,8 @@ int change_json_file(int CHOICE); // 2(Очистка файла с заполн
 int scan_json_object(json_object *obj);
 int view_json_file();
 int find_info_json_file();
+int load_to_ProductList(interprocessdata *shared);
+int save_to_file(interprocessdata *shared);
 
 int add_info(json_object * const, struct PRODUCT * const);
 int print_json_object_arr(json_object *obj);
