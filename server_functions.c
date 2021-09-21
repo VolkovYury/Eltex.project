@@ -3,12 +3,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/ip.h>
 #include <sys/poll.h>
 #include <pthread.h>
 #include <arpa/inet.h>//for pton
+
 #include "network.h"
 #include "server_functions.h"
 

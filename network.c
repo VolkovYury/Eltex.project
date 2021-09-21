@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/ip.h> 
+#include <netinet/ip.h>
+
 #include "network.h"
+
 //Pack Product and send it
 int sendProduct(int fd, const Product *element)
 {

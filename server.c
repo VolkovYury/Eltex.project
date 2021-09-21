@@ -3,14 +3,11 @@
 #include <string.h>//for memset
 #include <stdlib.h>//for malloc
 #include <stdint.h>//for uint8_t
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>//for pool
-#include <netinet/ip.h> 
-#include <arpa/inet.h>//for pton
-#include <errno.h>
+
 #include <pthread.h>
-#include "products.pb-c.h"
+
 #include "network.h"
 #include "server_functions.h"
 #include "jsonEditor.h"

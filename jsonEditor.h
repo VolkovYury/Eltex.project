@@ -1,6 +1,7 @@
 #ifndef JSON_EDITOR
 #define JSON_EDITOR
 #include <stdint.h>
+
 #include "products.pb-c.h"
 #include "json-cH/json.h"
 #include "json-cH/json_visit.h"

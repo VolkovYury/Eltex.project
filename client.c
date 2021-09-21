@@ -2,15 +2,11 @@
 #include <unistd.h>
 #include <string.h>                     //for memset
 #include <stdlib.h>                     //for malloc
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/ip.h>
-#include <arpa/inet.h>                  //for pton
-#include <errno.h>
 
 #include "products.pb-c.h"
 #include "client_functions.h"
-#include "network.h"
 #include "wrapperfunc.h"
 
 static struct sockaddr_in server;
