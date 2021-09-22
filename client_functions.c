@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <netinet/ip.h>
 #include <string.h>
+#include <regex.h>
 
 #include "network.h"
 #include "products.pb-c.h"
@@ -279,93 +280,38 @@ int enterNumber(uint32_t min, uint32_t max)
 
 // The function is responsible for entering the IP-address by the user
 // *res - pointer to an array of char with the received address
-void enterIP(char *res) {
-        char enteredString[80];
+void enterIP(char *res)
+{
+        // RegEx for IP
+        char reg[] = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[.]){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+
+        char enteredString[16];
         int done = 1;
 
         while(done) {
                 scanf("%s", enteredString);
 
-                char ip[16] = "";               // Found IP-address
-                char result[4];                 // Found number
-                uint8_t countIndex = 0;         // Index counter of the found number
-                uint8_t countNum = 0;           // Counter of the digits
-                uint8_t countDot = 0;           // Counter of the dots
-                uint8_t prevNumber = 0;         // Flag "Previous character is a number"
+                regex_t preg;
+                int err, regerr;
 
-                for (int i = 0; enteredString[i] != '\0'; i++) {
-                        // If digits are processed:
-                        if (enteredString[i] >= 48 && enteredString[i] <= 57) {
-                                countNum++;
-                                if (countNum > 3) {
-                                        printf("\"IP\" is wrong. The octet must be a number between 0 and 255, "
-                                               "inclusive.\n Try again: ");
-                                        break;
-                                }
+                err = regcomp (&preg, reg, REG_EXTENDED);
 
-                                result[countIndex] = enteredString[i];
-                                countIndex++;
+                if (err != 0) {
+                        char buff[512];
+                        regerror(err, &preg, buff, sizeof(buff));
+                        printf("%s\n", buff);
+                }
 
-                                if (enteredString[i+1] == '\0') {
-                                        result[countIndex] = '\0';
-
-                                        int octet = (int) strtol(result, NULL, 10);
-                                        if (octet >=0 && octet <=255 && countDot == 3) {
-                                                strcat(ip, ".");
-                                                strncat(ip, result, 3);
-
-                                                strcpy(res, ip);
-                                                done = 0;
-                                                break;
-                                        } else {
-                                                printf("\"IP\" is wrong. The octet must be a number between 0 and"
-                                                       " 255, inclusive.\n Try again: ");
-                                                break;
-                                        }
-                                }
-
-                                prevNumber = 1;
-
-                        // if dot is processed:
-                        } else if (enteredString[i] == 46) {
-                                countNum = 0;
-                                countDot++;
-                                if (countDot > 3) {
-                                        printf("\"IP\" is wrong. \n Try again: ");
-                                        break;
-                                }
-
-                                if (prevNumber) {
-                                        result[countIndex] = '\0';
-
-                                        int octet = (int) strtol(result, NULL, 10);
-                                        if (octet >=0 && octet <=255) {
-
-                                                if (countDot == 1) {
-                                                        strncat(ip, result, 3);
-                                                } else {
-                                                        strcat(ip, ".");
-                                                        strncat(ip, result, 3);
-                                                }
-
-                                                prevNumber = 0;
-                                                countIndex = 0;
-                                        } else {
-                                                printf("\"IP\" is wrong. The octet must be a number between 0 and"
-                                                       " 255, inclusive.\n Try again: ");
-                                                break;
-                                        }
-
-                                } else {
-                                        printf("\"IP\" is wrong. The IP can't start with a dot or contain two "
-                                               "dots in a row.\n Try again: ");
-                                        break;
-                                }
-
-                        } else {
-                                printf("\"IP\" is wrong. The address contains invalid characters.\n Tyr again: ");
-                                break;
-                        }
+                regmatch_t pm;
+                regerr = regexec (&preg, enteredString, 0, &pm, 0);
+                if (regerr == 0) {
+                        strcpy(res, enteredString);
+                        done = 0;
+                } else {
+                        char errbuf[512];
+                        regerror(regerr, &preg, errbuf, sizeof(errbuf));
+                        printf("%s\n", errbuf);
+                        printf("IP is wrong.\nTry again: ");
                 }
         }
 }
