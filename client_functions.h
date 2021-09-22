@@ -21,4 +21,5 @@ void printInfo(Product *elem);
 void printDatabase(ProductList *list);
 void printOneInfo(Product *elem);
 int enterNumber(uint32_t min, uint32_t max);
+void enterIP(char *res);
 #endif

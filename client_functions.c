@@ -79,14 +79,15 @@ void orderCard(int fd, const Product *card, ProductList **list)
 }
 
 // The function is responsible for connecting the client to the server at a known ip-address and port
-int connection(struct sockaddr_in servaddr) {
+int connection(struct sockaddr_in servaddr)
+{
         char addressServ[16];
 
         int fd = Socket(AF_INET, SOCK_STREAM, 0);
 
         printf("================================================================================\n");
-        printf("Enter the IP address of the server (UNSAFE): ");
-        scanf("%s", addressServ);
+        printf("Enter the IP address of the server: ");
+        enterIP(addressServ);
         printf("Enter the server port number: ");
         int port = enterNumber(1, 65535);
         printf("================================================================================\n");
@@ -102,7 +103,8 @@ int connection(struct sockaddr_in servaddr) {
 }
 
 // The function prints menu to the console
-void printMenu() {
+void printMenu()
+{
         printf("=====================================[MENU]=====================================\n");
         printf("1. Get all relevant information\n");
         printf("2. Get relevant information on the product\n");
@@ -114,7 +116,8 @@ void printMenu() {
 }
 
 // The function prints the contents of one card in the format of a table row to the console
-void printInfo(Product *elem) {
+void printInfo(Product *elem)
+{
         // Number of lines in each field (based on field width and character array size)
         int numOfLines = 1;
         int stringId = 1;
@@ -218,7 +221,8 @@ void printInfo(Product *elem) {
 }
 
 // The function prints the contents of the database to the console
-void printDatabase(ProductList *list) {
+void printDatabase(ProductList *list)
+{
         if(NULL == list) {
                 printf("Can't unpack\n");
         }
@@ -238,7 +242,8 @@ void printDatabase(ProductList *list) {
 }
 
 // The function prints the contents of one card to the console
-void printOneInfo(Product *elem) {
+void printOneInfo(Product *elem)
+{
         if(NULL == elem) {
                 printf("Can't unpack\n");
         }
@@ -257,7 +262,8 @@ void printOneInfo(Product *elem) {
 // The function is responsible for user input of numbers
 // min, max - the minimum and maximum value, respectively. These values are included in the range of values
 // return - correct number. If the user does not enter a number, then strtol() will return 0.
-int enterNumber(uint32_t min, uint32_t max) {
+int enterNumber(uint32_t min, uint32_t max)
+{
         char enteredString[80];
 
         while (1) {
@@ -268,5 +274,98 @@ int enterNumber(uint32_t min, uint32_t max) {
                         printf("WARNING: Invalid value. Try again:\n");
                 else
                         return result;
+        }
+}
+
+// The function is responsible for entering the IP-address by the user
+// *res - pointer to an array of char with the received address
+void enterIP(char *res) {
+        char enteredString[80];
+        int done = 1;
+
+        while(done) {
+                scanf("%s", enteredString);
+
+                char ip[16] = "";               // Found IP-address
+                char result[4];                 // Found number
+                uint8_t countIndex = 0;         // Index counter of the found number
+                uint8_t countNum = 0;           // Counter of the digits
+                uint8_t countDot = 0;           // Counter of the dots
+                uint8_t prevNumber = 0;         // Flag "Previous character is a number"
+
+                for (int i = 0; enteredString[i] != '\0'; i++) {
+                        // If digits are processed:
+                        if (enteredString[i] >= 48 && enteredString[i] <= 57) {
+                                countNum++;
+                                if (countNum > 3) {
+                                        printf("\"IP\" is wrong. The octet must be a number between 0 and 255, "
+                                               "inclusive.\n Try again: ");
+                                        break;
+                                }
+
+                                result[countIndex] = enteredString[i];
+                                countIndex++;
+
+                                if (enteredString[i+1] == '\0') {
+                                        result[countIndex] = '\0';
+
+                                        int octet = (int) strtol(result, NULL, 10);
+                                        if (octet >=0 && octet <=255 && countDot == 3) {
+                                                strcat(ip, ".");
+                                                strncat(ip, result, 3);
+
+                                                strcpy(res, ip);
+                                                done = 0;
+                                                break;
+                                        } else {
+                                                printf("\"IP\" is wrong. The octet must be a number between 0 and"
+                                                       " 255, inclusive.\n Try again: ");
+                                                break;
+                                        }
+                                }
+
+                                prevNumber = 1;
+
+                        // if dot is processed:
+                        } else if (enteredString[i] == 46) {
+                                countNum = 0;
+                                countDot++;
+                                if (countDot > 3) {
+                                        printf("\"IP\" is wrong. \n Try again: ");
+                                        break;
+                                }
+
+                                if (prevNumber) {
+                                        result[countIndex] = '\0';
+
+                                        int octet = (int) strtol(result, NULL, 10);
+                                        if (octet >=0 && octet <=255) {
+
+                                                if (countDot == 1) {
+                                                        strncat(ip, result, 3);
+                                                } else {
+                                                        strcat(ip, ".");
+                                                        strncat(ip, result, 3);
+                                                }
+
+                                                prevNumber = 0;
+                                                countIndex = 0;
+                                        } else {
+                                                printf("\"IP\" is wrong. The octet must be a number between 0 and"
+                                                       " 255, inclusive.\n Try again: ");
+                                                break;
+                                        }
+
+                                } else {
+                                        printf("\"IP\" is wrong. The IP can't start with a dot or contain two "
+                                               "dots in a row.\n Try again: ");
+                                        break;
+                                }
+
+                        } else {
+                                printf("\"IP\" is wrong. The address contains invalid characters.\n Tyr again: ");
+                                break;
+                        }
+                }
         }
 }
