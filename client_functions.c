@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <netinet/ip.h>
 #include <string.h>
+#include <regex.h>
 
 #include "network.h"
 #include "products.pb-c.h"
@@ -79,14 +80,15 @@ void orderCard(int fd, const Product *card, ProductList **list)
 }
 
 // The function is responsible for connecting the client to the server at a known ip-address and port
-int connection(struct sockaddr_in servaddr) {
+int connection(struct sockaddr_in servaddr)
+{
         char addressServ[16];
 
         int fd = Socket(AF_INET, SOCK_STREAM, 0);
 
         printf("================================================================================\n");
-        printf("Enter the IP address of the server (UNSAFE): ");
-        scanf("%s", addressServ);
+        printf("Enter the IP address of the server: ");
+        enterIP(addressServ);
         printf("Enter the server port number: ");
         int port = enterNumber(1, 65535);
         printf("================================================================================\n");
@@ -102,7 +104,8 @@ int connection(struct sockaddr_in servaddr) {
 }
 
 // The function prints menu to the console
-void printMenu() {
+void printMenu()
+{
         printf("=====================================[MENU]=====================================\n");
         printf("1. Get all relevant information\n");
         printf("2. Get relevant information on the product\n");
@@ -114,7 +117,8 @@ void printMenu() {
 }
 
 // The function prints the contents of one card in the format of a table row to the console
-void printInfo(Product *elem) {
+void printInfo(Product *elem)
+{
         // Number of lines in each field (based on field width and character array size)
         int numOfLines = 1;
         int stringId = 1;
@@ -218,7 +222,8 @@ void printInfo(Product *elem) {
 }
 
 // The function prints the contents of the database to the console
-void printDatabase(ProductList *list) {
+void printDatabase(ProductList *list)
+{
         if(NULL == list) {
                 printf("Can't unpack\n");
         }
@@ -238,7 +243,8 @@ void printDatabase(ProductList *list) {
 }
 
 // The function prints the contents of one card to the console
-void printOneInfo(Product *elem) {
+void printOneInfo(Product *elem)
+{
         if(NULL == elem) {
                 printf("Can't unpack\n");
         }
@@ -257,7 +263,8 @@ void printOneInfo(Product *elem) {
 // The function is responsible for user input of numbers
 // min, max - the minimum and maximum value, respectively. These values are included in the range of values
 // return - correct number. If the user does not enter a number, then strtol() will return 0.
-int enterNumber(uint32_t min, uint32_t max) {
+int enterNumber(uint32_t min, uint32_t max)
+{
         char enteredString[80];
 
         while (1) {
@@ -268,5 +275,43 @@ int enterNumber(uint32_t min, uint32_t max) {
                         printf("WARNING: Invalid value. Try again:\n");
                 else
                         return result;
+        }
+}
+
+// The function is responsible for entering the IP-address by the user
+// *res - pointer to an array of char with the received address
+void enterIP(char *res)
+{
+        // RegEx for IP
+        char reg[] = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[.]){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+
+        char enteredString[16];
+        int done = 1;
+
+        while(done) {
+                scanf("%s", enteredString);
+
+                regex_t preg;
+                int err, regerr;
+
+                err = regcomp (&preg, reg, REG_EXTENDED);
+
+                if (err != 0) {
+                        char buff[512];
+                        regerror(err, &preg, buff, sizeof(buff));
+                        printf("%s\n", buff);
+                }
+
+                regmatch_t pm;
+                regerr = regexec (&preg, enteredString, 0, &pm, 0);
+                if (regerr == 0) {
+                        strcpy(res, enteredString);
+                        done = 0;
+                } else {
+                        char errbuf[512];
+                        regerror(regerr, &preg, errbuf, sizeof(errbuf));
+                        printf("%s\n", errbuf);
+                        printf("IP is wrong.\nTry again: ");
+                }
         }
 }
