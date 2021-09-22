@@ -8,7 +8,7 @@
 #define JSON_FILE_NAME "product.json"
 #define JSON_OBJECT_STR(obj, key) json_object_get_string(json_object_object_get(obj, key))
 
-char filter[64] = "";
+char *filter;
 
 enum action {
         VIEW = 1,
@@ -65,17 +65,24 @@ int change_json_file(int CHOICE) // Функция позволяет добав
                         json_object *node = json_object_new_object();
                         struct PRODUCT product = {0, 0, 0, "a", "a"};
 
-                        printf("quantity, price, name, description: ");
-
                         product.id = i;
-                        scanf(" %d %lf %s %s",
-                              &product.quantity,
-                              &product.price,
-                              product.name,
-                              product.description);
+                        printf("Quantity: ");
+                        scanf(" %d", &product.quantity);
 
+                        printf("Price: ");
+                        scanf(" %lf", &product.price);
+                        
+                        get_string();
+
+                        printf("Name: ");
+                        product.name = get_string();
+                        
+                        printf("Description: ");
+                        product.description = get_string();
+                        
                         add_info(node, &product);
                         json_object_array_add(arr, node);
+                        exit = 0;
                 }
         }
 
@@ -207,7 +214,8 @@ int find_info_json_file()//Функция поиска информации по
         json_object *root = json_object_from_file(JSON_FILE_NAME);
 
         printf("Filter: ");
-        scanf("%s", filter);
+        get_string();
+        filter = get_string();
         printf("\nSearch for %s\n\n", filter);
 
         json_c_visit(root, 0, doit, NULL);
@@ -312,4 +320,28 @@ int save_to_file(interprocessdata *shared, const char *filename)
    }
 	json_object_put(arr);
 	return 0;
+}
+
+char* get_string() 
+{
+    int len = 0; 
+    int capacity = 1; 
+    char* s = (char*)malloc(sizeof(char)); 
+
+    char c = getchar(); 
+
+    while (c != '\n') {
+        s[(len)++] = c; 
+
+        if (len >= capacity) {
+            capacity *= 2;
+            s = (char*)realloc(s, capacity * sizeof(char));
+        }
+
+        c = getchar();       
+    }
+
+    s[len] = '\0';
+
+    return s;
 }
