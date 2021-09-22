@@ -49,41 +49,30 @@ void orderCard(int fd, const Product *card, ProductList **list)
 
 	//Search for card in database
 	i = findCard(card, *list);
+
 	//If nothing found
 	if(i == (*list)->n_data) {
-		printf("No card in database\n");//THIS SHOULD BE CHANGED
+		printf("\nNo product found with current ID\n\n");
 		return;
 	}
 
-	if (-1 == send(fd, &signal, 1, 0)) {
-		printf("Can't send signal\n");
-		return;
-	}
-	if (-1 == sendProduct(fd, card)) {
-		printf("Can't send product\n");
-		return;
-	}
-	if (-1 == recv(fd, &signal, 1, 0)) {
-		printf("Can't receive signal\n");
-		return;
-	}
+        Send(fd, &signal, 1, 0);
+        sendProduct(fd, card);
+        Recv(fd, &signal, 1, 0);
 
-	if(signal == ACCEPT){
-		(*list)->data[i]->quantity -= card->quantity;
-	}
-	else {
-		printf("Order failed.\n");//THIS SHOULD BE CHANGED
-		if (-1 == requestDatabase(fd, list)) {
-			return;
-		}
-	}
+	if(signal == ACCEPT) {
+                (*list)->data[i]->quantity -= card->quantity;
+                printf("\nOrder confirmed!\n\n");
+        } else {
+                printf("\nOrder cancelled! Required conditions cannot be met\n\n");
+        }
+
 }
 
 // The function is responsible for connecting the client to the server at a known ip-address and port
 int connection(struct sockaddr_in servaddr)
 {
         char addressServ[16];
-
         int fd = Socket(AF_INET, SOCK_STREAM, 0);
 
         printf("================================================================================\n");
@@ -99,7 +88,6 @@ int connection(struct sockaddr_in servaddr)
         Inet_pton(AF_INET, addressServ, &servaddr.sin_addr);
 
         Connect(fd, (struct sockaddr *) &servaddr, sizeof servaddr);
-
         return fd;
 }
 
@@ -284,11 +272,9 @@ void enterIP(char *res)
 {
         // RegEx for IP
         char reg[] = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[.]){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
-
         char enteredString[16];
-        int done = 1;
 
-        while(done) {
+        while(1) {
                 scanf("%s", enteredString);
 
                 regex_t preg;
@@ -306,12 +292,12 @@ void enterIP(char *res)
                 regerr = regexec (&preg, enteredString, 0, &pm, 0);
                 if (regerr == 0) {
                         strcpy(res, enteredString);
-                        done = 0;
+                        break;
                 } else {
                         char errbuf[512];
                         regerror(regerr, &preg, errbuf, sizeof(errbuf));
                         printf("%s\n", errbuf);
-                        printf("IP is wrong.\nTry again: ");
+                        printf("WARNING: IP is wrong.\nTry again: ");
                 }
         }
 }
