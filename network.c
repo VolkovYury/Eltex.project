@@ -65,10 +65,15 @@ int receiveProduct(int fd, Product **element)
 //Pack ProductList and send it
 int sendProductList(int fd, const ProductList *element)
 {
-	void *resultBuffer;
+	uint8_t *resultBuffer;
 	size_t resultBufferSize;
+	size_t realSize;
 
 	resultBufferSize = product_list__get_packed_size(element);
+	realSize = resultBufferSize;
+	if (1400 < resultBufferSize) {
+		realSize = 1400;
+	}
 	resultBuffer = malloc(resultBufferSize);
 	if (NULL == resultBuffer) {
 		printf("Malloc error\n");
@@ -82,10 +87,13 @@ int sendProductList(int fd, const ProductList *element)
 		return -1;
 	}
 	resultBufferSize = ntohl(resultBufferSize);
-	if (-1 == send(fd, resultBuffer, resultBufferSize, 0)) {
-		printf("Send product error\n");
-		free(resultBuffer);
-		return -1;
+
+	for (size_t size = 0; size < resultBufferSize; size += realSize) {
+		if (-1 == send(fd, resultBuffer + size, realSize, 0)) {
+			printf("Send product error\n");
+			free(resultBuffer);
+			return -1;
+		}
 	}
 	free(resultBuffer);
 	return 0;
@@ -97,20 +105,30 @@ int receiveProductList(int fd, ProductList **element)
 {
 	void *resultBuffer;
 	size_t resultBufferSize;
+	size_t realSize;
 
 	if (-1 == recv(fd, &resultBufferSize, 4, 0)) {
 		printf("Receive size error\n");
 		return -1;
 	}
 	resultBufferSize = ntohl(resultBufferSize);
+
+	realSize = resultBufferSize;
+	if (1400 < resultBufferSize) {
+		realSize = 1400;
+	}
 	resultBuffer = malloc(resultBufferSize);
 	if (NULL == resultBuffer) {
 		printf("Malloc error\n");
 		return -1;
 	}
-	if (-1 == recv(fd, resultBuffer, resultBufferSize, 0)) {
-		printf("Receive product error\n");
-		return -1;
+
+	for (size_t size = 0; size < resultBufferSize; size += realSize) {
+		if (-1 == recv(fd, resultBuffer + size, realSize, 0)) {
+			printf("Receive product error\n");
+			free(resultBuffer);
+			return -1;
+		}
 	}
 
 	*element = product_list__unpack(NULL, resultBufferSize, resultBuffer);
