@@ -90,6 +90,9 @@ int sendProductList(int fd, const ProductList *element)
 	resultBufferSize = ntohl(resultBufferSize);
 
 	for (size_t size = 0; size < resultBufferSize; size += realSize) {
+		if(realSize > resultBufferSize - size) {
+			realSize = resultBufferSize - size;
+		}
 		if (-1 == send(fd, resultBuffer + size, realSize, 0)) {
 			printf("Send product error\n");
 			free(resultBuffer);
@@ -125,6 +128,9 @@ int receiveProductList(int fd, ProductList **element)
 	}
 
 	for (size_t size = 0; size < resultBufferSize; size += realSize) {
+		if(realSize > resultBufferSize - size) {
+			realSize = resultBufferSize - size;
+		}
 		if (-1 == recv(fd, resultBuffer + size, realSize, 0)) {
 			printf("Receive product error\n");
 			free(resultBuffer);
