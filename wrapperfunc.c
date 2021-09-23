@@ -37,7 +37,7 @@ void Connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
         int result = connect(sockfd, addr, addrlen);
 
         if (result == 0) {
-                printf("Server connection successful!\n\n\n");
+                printf("Server connection successful!\n");
 
         } else if (result == -1) {
                 perror("Warning: connect function failed\n");

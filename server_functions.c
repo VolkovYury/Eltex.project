@@ -78,16 +78,22 @@ void freeProductList(ProductList *list)
 //Print one product to terminal
 void printProduct(Product* elem)
 {
-	printf("id: %u, name: %s, description: %s, price: %f, quantity %u\n",
+	printf("ID: %u\n Name: %s\n Description: %s\n Price: %f\n Quantity %u\n",
 	elem->id, elem->name, elem->description, elem->price, elem->quantity);
+        printf("--------------------------------------------------------------------------------\n");
 }
 
 //Print database
 void printProductList(ProductList *list)
 {
+        printf("\n\n");
+        printf("                           [All relevant information]                           \n");
+        printf("--------------------------------------------------------------------------------\n");
+
 	for(size_t i = 0; i < list->n_data; ++i) {
 		printProduct(list->data[i]);
 	}
+        printf("\n\n");
 }
 
 //set exit_signal to 1
@@ -143,9 +149,7 @@ void *listenInput(void *data)
 			break;
 		}
 		else if (!strcmp("show", cmd)) {
-			printf("---------------\n");
 			printProductList(sharedData->database);
-			printf("---------------\n");
 		}
 	}
 	return NULL;
@@ -251,12 +255,12 @@ void *handleClient(void *args)
 			printf("Connection %d closed\n", fd);
 			break;
 		}
-		//if nothing happened
+		// if nothing happened
 		else if ( ret == 0 ) {
 			continue;
 		}
 
-		//if can receive and something happened
+		// if can receive and something happened
 		poolData.revents = 0;
 		if (0 == recv(fd, &signal, 1, 0)) {
 			printf("Connection %d closed\n", fd);

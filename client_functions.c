@@ -95,6 +95,7 @@ int connection(struct sockaddr_in servaddr)
 // The function prints menu to the console
 void printMenu()
 {
+        printf("\n\n");
         printf("=====================================[MENU]=====================================\n");
         printf("1. Get all relevant information\n");
         printf("2. Get relevant information on the product\n");

@@ -49,7 +49,9 @@ int main(int argc, char *argv[])
 		goto FREE_AND_EXIT;
 	}
 	
-	printf("Server start working\n");
+	printf("Server start working!\n\n");
+        printf("Commands available:\nshow - display the current database\nexit - close "
+               "all connections and server application\n\n");
 
 	poolData.fd = connectionSocket;
 	poolData.events = POLLIN;
