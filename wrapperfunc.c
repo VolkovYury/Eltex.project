@@ -37,8 +37,7 @@ void Connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
         int result = connect(sockfd, addr, addrlen);
 
         if (result == 0) {
-                printf("Server connection successful!\n");
-                printf("================================================================================\n");
+                printf("Server connection successful!\n\n\n");
 
         } else if (result == -1) {
                 perror("Warning: connect function failed\n");
@@ -98,9 +97,9 @@ int Accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
         return result;
 }
 
-int Send(int sockfd, const void *buf, size_t len, int flags)
+ssize_t Send(int sockfd, const void *buf, size_t len, int flags)
 {
-      int result = send(sockfd, buf, len, flags);
+      ssize_t result = send(sockfd, buf, len, flags);
 
       if (result == -1) {
               perror("Warning: send function failed\n");
@@ -110,9 +109,9 @@ int Send(int sockfd, const void *buf, size_t len, int flags)
       return result;
 }
 
-int Recv(int sockfd, void *buf, size_t len, int flags)
+ssize_t Recv(int sockfd, void *buf, size_t len, int flags)
 {
-        int result = recv(sockfd, buf, len, flags);
+        ssize_t result = recv(sockfd, buf, len, flags);
 
         if (result == -1) {
                 perror("Warning: recv function failed\n");

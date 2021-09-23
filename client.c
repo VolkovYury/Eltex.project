@@ -29,9 +29,10 @@ int main()
                 case PRINT_DATABASE:
                         requestDatabase(talkingSocket, &list);
                         printDatabase(list);
+                        //pppppProductList(list);
                         break;
                 case PRINT_ONE_CARD:
-                        printf("[Product selection for information]\n");
+                        printf("\n[Product selection for information]\n");
                         printf("Enter the product code: ");
                         code = enterNumber(1, 4294967295);      // max value - max uint32_t number
                         requestDatabase(talkingSocket, &list);
@@ -43,14 +44,15 @@ int main()
                         size_t i = findCard(oneCard, list);
 
                         if (i == list->n_data)
-                                printf("No card found in the database\n");
+                                printf("\nNo card found in the database\n\n");
                         else
                                 printOneInfo(list->data[i]);
+                                //pppppProduct(list->data[i]);
 
                         free(oneCard);
                         break;
                 case ORDER_REQST:
-                        printf("[Product and quantity selection for order request]\n");
+                        printf("\n[Product and quantity selection for order request]\n");
                         printf("Enter the product code: ");
                         code = enterNumber(1, 4294967295);
                         printf("Enter the quantity: ");
@@ -66,7 +68,7 @@ int main()
                         break;
                 case CLOSE:
                         printf("Closing a connection...\n");
-                        sleep(2);
+                        sleep(1);
                         product_list__free_unpacked(list, NULL);
                         Shutdown(talkingSocket, SHUT_RDWR);
                         Close(talkingSocket);
@@ -75,9 +77,7 @@ int main()
                         printMenu();
                         break;
                 default:
-                        printf("Invalid value entered!\n");
+                        printf("\nInvalid value entered!\n\n");
                 }
         }
-
-        return 0;
 }
