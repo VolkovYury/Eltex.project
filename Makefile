@@ -1,6 +1,6 @@
 all: server.o client.o products.pb-c.o network.o server_functions.o client_functions.o wrapperfunc.o jsonEditor.o
-	gcc client.o products.pb-c.o network.o client_functions.o wrapperfunc.o -o client -lpthread -L./protobuf-c -lprotobuf-c -Wl,-rpath,./protobuf-c -Wall -Wextra -Werror
-	gcc server.o products.pb-c.o network.o jsonEditor.o server_functions.o wrapperfunc.o -o server -lpthread -L./protobuf-c -lprotobuf-c -Wl,-rpath,./protobuf-c -L./json-cH -ljson-c -Wl,-rpath,./json-cH -Wall -Wextra -Werror
+	gcc client.o products.pb-c.o network.o client_functions.o wrapperfunc.o -lm -o client -lpthread -L./protobuf-c -lprotobuf-c -Wl,-rpath,./protobuf-c -Wall -Wextra -Werror
+	gcc server.o products.pb-c.o network.o jsonEditor.o server_functions.o wrapperfunc.o -lm -o server -lpthread -L./protobuf-c -lprotobuf-c -Wl,-rpath,./protobuf-c -L./json-cH -ljson-c -Wl,-rpath,./json-cH -Wall -Wextra -Werror
 server.o: server.c
 	gcc server.c -c
 client.o: client.c

@@ -29,6 +29,7 @@ int main()
                 case PRINT_DATABASE:
                         requestDatabase(talkingSocket, &list);
                         printDatabase(list);
+                        //pppppProductList(list);
                         break;
                 case PRINT_ONE_CARD:
                         printf("[Product selection for information]\n");
@@ -46,6 +47,7 @@ int main()
                                 printf("No card found in the database\n");
                         else
                                 printOneInfo(list->data[i]);
+                                //pppppProduct(list->data[i]);
 
                         free(oneCard);
                         break;

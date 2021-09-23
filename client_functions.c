@@ -4,6 +4,7 @@
 #include <netinet/ip.h>
 #include <string.h>
 #include <regex.h>
+#include <math.h>
 
 #include "network.h"
 #include "products.pb-c.h"
@@ -120,66 +121,33 @@ void printMenu()
 void printInfo(Product *elem)
 {
         // Number of lines in each field (based on field width and character array size)
-        int numOfLines = 1;
-        int stringId = 1;
-        int stringName = 1;
-        int stringDescription = 1;
-        int stringPrice = 1;
-        int stringPieces = 1;
 
         char separator = '|';
         /*
          * magic number:
          * 11 - uint32_t max 10-digit number + (\n)
-         * 41 - 10 char * 4 string + (\n)
-         * 181 - 45 char * 4 string + (\n)
-         * 23 - 11 char * 2 string + (\n)
+         * 61 - 10 char * 6 string + (\n)
+         * 271 - 45 char * 6 string + (\n)
+         * 34 - 11 char * 3 string + (\n)
          */
         char id[11];
         snprintf(id, 11, "%u", elem->id);
-        char name[41];
-        snprintf(name, 41, "%s", elem->name);
-        char description[181];
-        snprintf(description, 181, "%s", elem->description);
-        char price[23];
-        snprintf(price, 23, "%.2f", elem->price);
+        char name[61];
+        snprintf(name, 61, "%s", elem->name);
+        char description[271];
+        snprintf(description, 271, "%s", elem->description);
+        char price[34];
+        snprintf(price, 34, "%.2f", elem->price);
         char pieces[11];
         snprintf(pieces, 11, "%u", elem->quantity);
 
-        for (int ptr = 1; ptr <= strlen(id); ptr = ptr + 4) {
-                if ((float) ptr / 4 > (float) numOfLines) {
-                        numOfLines++;
-                        stringId++;
-                }
-        }
+        int stringId = ceil((double)strlen(id)/4);
+        int stringName = ceil((double) strlen(name)/10);
+        int stringDescription = ceil((double) strlen(description)/45);
+        int stringPrice = ceil((double) strlen(price)/11);
+        int stringPieces = ceil((double) strlen(pieces)/4);
 
-        for (int ptr = 1; ptr <= strlen(name); ptr = ptr + 10) {
-                if ((float) ptr / 10 > (float) numOfLines) {
-                        numOfLines++;
-                        stringName++;
-                }
-        }
-
-        for (int ptr = 1; ptr <= strlen(description); ptr = ptr + 45) {
-                if ((float) ptr / 45 > (float) numOfLines) {
-                        numOfLines++;
-                        stringDescription++;
-                }
-        }
-
-        for (int ptr = 1; ptr <= strlen(price); ptr = ptr + 11) {
-                if ((float) ptr / 11 > (float) numOfLines) {
-                        numOfLines++;
-                        stringPrice++;
-                }
-        }
-
-        for (int ptr = 1; ptr <= strlen(pieces); ptr = ptr + 4) {
-                if ((float) ptr / 4 > (float) numOfLines) {
-                        numOfLines++;
-                        stringPieces++;
-                }
-        }
+        int numOfLines = maxValue(stringId, stringName, stringDescription, stringPrice, stringPieces);
 
         // Creating the structure of a table row
         for (int i = 1; i <= numOfLines; i++) {
@@ -314,4 +282,17 @@ void enterIP(char *res)
                         printf("IP is wrong.\nTry again: ");
                 }
         }
+}
+
+int maxValue(int a, int b, int c, int d, int e)
+{
+        return maxOfTwo(a, maxOfTwo(b, maxOfTwo(c, maxOfTwo(d,e))));
+}
+
+int maxOfTwo(int a, int b)
+{
+        if (a>b)
+                return a;
+        else
+                return b;
 }
