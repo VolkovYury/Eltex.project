@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>//for memset
 #include <stdlib.h>//for malloc
 #include <stdint.h>//for uint8_t
@@ -11,6 +10,7 @@
 #include "network.h"
 #include "server_functions.h"
 #include "jsonEditor.h"
+#include "wrapperfunc.h"
 
 #define MAX_CLIENTS_IN_QUEUE (size_t)10
 
@@ -91,8 +91,8 @@ FREE_AND_EXIT:
 	freeProductList(sharedData.database);
 	pthread_mutex_destroy(&sharedData.data_mutex);
 	if (-1 != connectionSocket) {
-		shutdown(connectionSocket, SHUT_RDWR);
-		close(connectionSocket);
+		Shutdown(connectionSocket, SHUT_RDWR);
+		Close(connectionSocket);
 	}
 	printf("Server stop working\n");
 	return 0;
